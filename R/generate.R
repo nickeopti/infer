@@ -85,7 +85,8 @@ generate <- function(x, reps = 1, type = NULL,
     
     attr(res, "type") <- "bootstrap"
     attr(res, "generated") <- TRUE
-    attr(res, "response_name") <- "value"
+    # attr(res, "response_name") <- "value"
+    attr(x, "response")    <- get_expr(value)
 
     append_infer_class(res)
   } else {
