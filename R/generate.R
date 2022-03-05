@@ -90,7 +90,7 @@ generate <- function(x, reps = 1, type = NULL,
     
     # res <- copy_attrs(to = res, from = tmp)
     # append_infer_class(res)
-    tmp
+    return(tmp)
   } else {
     # Check type argument, warning if necessary
     type <- sanitize_generation_type(type)
@@ -106,7 +106,7 @@ generate <- function(x, reps = 1, type = NULL,
 
     attr(x, "generated") <- TRUE
 
-    switch(
+    res <- switch(
       type,
       bootstrap = bootstrap(x, reps, ...),
       permute = {
@@ -116,6 +116,7 @@ generate <- function(x, reps = 1, type = NULL,
       draw = draw(x, reps, ...),
       simulate = draw(x, reps, ...)
     )
+    return(res)
   }
 }
 
