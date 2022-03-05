@@ -96,23 +96,43 @@ calculate <- function(x,
                       ...) {
   check_type(x, tibble::is_tibble)
   check_if_mlr(x, "calculate")
-  stat <- check_calculate_stat(stat)
-  check_variables_vs_stat(x, stat)
-  check_point_params(x, stat)
   
-  order <- check_order(x, order, in_calculate = TRUE, stat)
-
-  if (!is_generated(x)) {
-    x$replicate <- 1L
-  }
-  
-  x <- message_on_excessive_null(x, stat = stat, fn = "calculate")
-  x <- warn_on_insufficient_null(x, stat, ...)
-  
-  # Use S3 method to match correct calculation
-  result <- calc_impl(
-    structure(stat, class = gsub(" ", "_", stat)), x, order, ...
+  f <- TRUE
+  tryCatch(
+    expr = {
+      if (is.character(stat)) {
+        default_behaviour <- TRUE
+      } else {
+        print("This should never occur... Check your inputs")
+      }
+    },
+    error = function(e) {
+      default_behaviour <<- FALSE
+    }
   )
+  
+  if (default_behaviour) {
+    stat <- check_calculate_stat(stat)
+    check_variables_vs_stat(x, stat)
+    check_point_params(x, stat)
+    
+    order <- check_order(x, order, in_calculate = TRUE, stat)
+  
+    if (!is_generated(x)) {
+      x$replicate <- 1L
+    }
+    
+    x <- message_on_excessive_null(x, stat = stat, fn = "calculate")
+    x <- warn_on_insufficient_null(x, stat, ...)
+    
+    # Use S3 method to match correct calculation
+    result <- calc_impl(
+      structure(stat, class = gsub(" ", "_", stat)), x, order, ...
+    )
+  } else {
+    stat <- enquo(stat)
+    result <- summarize(x, stat = !!stat)
+  }
 
   result <- copy_attrs(to = result, from = x)
   attr(result, "stat") <- stat

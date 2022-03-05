@@ -10,7 +10,9 @@
 #'
 #' Learn more in `vignette("infer")`.
 #'
-#' @param x A data frame that can be coerced into a [tibble][tibble::tibble].
+#' @param x A data frame that can be coerced into a [tibble][tibble::tibble],
+#'   or a function which takes a single numeric argument, and returns
+#'   a vector of that many samples.
 #' @param reps The number of resamples to generate.
 #' @param type The method used to generate resamples of the observed
 #'   data reflecting the null hypothesis. Currently one of
@@ -19,6 +21,8 @@
 #'   data to permute (independently of each other). Defaults to only the
 #'   response variable. Note that any derived effects that depend on these
 #'   columns (e.g., interaction effects) will also be affected.
+#' @param n The number of samples to draw from the theoretical distribution,
+#'   if using this function with a distribution instead of a tibble
 #' @param ... Currently ignored.
 #'
 #' @return A tibble containing `reps` generated datasets, indicated by the
@@ -75,24 +79,23 @@
 #' @family core functions
 #' @export
 generate <- function(x, reps = 1, type = NULL,
-                     variables = !!response_expr(x), ...) {
+                     variables = !!response_expr(x), n = NULL, ...) {
   if (is.function(x)) {
-    tmp <- x(2) %>% as_tibble
-    print(tmp)
-    tmp <- tmp %>% specify(response=value)
-    print(tmp)
-    tmp <- tmp %>% bootstrap(reps, ...)
-    print(tmp)
+    # calculate a dummy example in order to get the correct attrs
+    tmp <- x(2) %>%
+      as_tibble %>%
+      specify(response = value) %>%
+      generate(reps = 2, type = "bootstrap")
     
-    # res <- x(reps * n) %>%
-    #   as_tibble %>%
-    #   dplyr::mutate(replicate = rep(seq_len(reps), each = n)) %>%
-    #   dplyr::select(replicate, dplyr::everything()) %>%
-    #   dplyr::group_by(replicate)
-    
-    # res <- copy_attrs(to = res, from = tmp)
-    # append_infer_class(res)
-    return(tmp)
+    # generate the data
+    res <- x(reps * n) %>%
+      as_tibble %>%
+      dplyr::mutate(replicate = rep(seq_len(reps), each = n)) %>%
+      dplyr::select(replicate, dplyr::everything()) %>%
+      dplyr::group_by(replicate)
+
+    res <- copy_attrs(to = res, from = tmp)
+    append_infer_class(res)
   } else {
     # Check type argument, warning if necessary
     type <- sanitize_generation_type(type)
@@ -108,7 +111,7 @@ generate <- function(x, reps = 1, type = NULL,
 
     attr(x, "generated") <- TRUE
 
-    res <- switch(
+    switch(
       type,
       bootstrap = bootstrap(x, reps, ...),
       permute = {
@@ -118,7 +121,6 @@ generate <- function(x, reps = 1, type = NULL,
       draw = draw(x, reps, ...),
       simulate = draw(x, reps, ...)
     )
-    return(res)
   }
 }
 
