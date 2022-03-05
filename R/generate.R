@@ -80,7 +80,7 @@ generate <- function(x, reps = 1, type = NULL,
     tmp <- x(2) %>%
       as_tibble %>%
       specify(response=value) %>%
-      generate(reps=reps, type="bootstrap")
+      bootstrap(reps, ...)
 
     # res <- x(reps * n) %>%
     #   as_tibble %>%
