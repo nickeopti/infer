@@ -77,11 +77,13 @@
 generate <- function(x, reps = 1, type = NULL,
                      variables = !!response_expr(x), ...) {
   if (is.function(x)) {
-    tmp <- x(2) %>%
-      as_tibble %>%
-      specify(response=value) %>%
-      bootstrap(reps, ...)
-
+    tmp <- x(2) %>% as_tibble
+    print(tmp)
+    tmp <- tmp %>% specify(response=value)
+    print(tmp)
+    tmp <- tmp %>% bootstrap(reps, ...)
+    print(tmp)
+    
     # res <- x(reps * n) %>%
     #   as_tibble %>%
     #   dplyr::mutate(replicate = rep(seq_len(reps), each = n)) %>%
