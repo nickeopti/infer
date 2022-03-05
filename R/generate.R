@@ -82,14 +82,15 @@ generate <- function(x, reps = 1, type = NULL,
       specify(response = value) %>%
       generate(reps=2, type="bootstrap")
 
-    res <- x(reps * n) %>%
-      as_tibble %>%
-      dplyr::mutate(replicate = rep(seq_len(reps), each = n)) %>%
-      dplyr::select(replicate, dplyr::everything()) %>%
-      dplyr::group_by(replicate)
+    # res <- x(reps * n) %>%
+    #   as_tibble %>%
+    #   dplyr::mutate(replicate = rep(seq_len(reps), each = n)) %>%
+    #   dplyr::select(replicate, dplyr::everything()) %>%
+    #   dplyr::group_by(replicate)
     
-    res <- copy_attrs(to = res, from = tmp)
-    append_infer_class(res)
+    # res <- copy_attrs(to = res, from = tmp)
+    # append_infer_class(res)
+    tmp
   } else {
     # Check type argument, warning if necessary
     type <- sanitize_generation_type(type)
