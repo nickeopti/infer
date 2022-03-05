@@ -77,11 +77,16 @@
 generate <- function(x, reps = 1, type = NULL,
                      variables = !!response_expr(x), n = NULL, ...) {
   if (is.function(x)) {
-    x(reps * n) %>%
+    res <- x(reps * n) %>%
       as_tibble %>%
       dplyr::mutate(replicate = rep(seq_len(reps), each = n)) %>%
       dplyr::select(replicate, dplyr::everything()) %>%
       dplyr::group_by(replicate)
+    
+    attr(res, "type") <- "bootstrap"
+    attr(res, "generated") <- TRUE
+
+    append_infer_class(res)
   } else {
     # Check type argument, warning if necessary
     type <- sanitize_generation_type(type)
