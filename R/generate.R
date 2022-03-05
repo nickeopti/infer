@@ -75,7 +75,7 @@
 #' @family core functions
 #' @export
 generate <- function(x, reps = 1, type = NULL,
-                     variables = !!response_expr(x), n = NULL, ...) {
+                     variables = !!response_expr(x), ...) {
   if (is.function(x)) {
     tmp <- x(2) %>%
       as_tibble %>%
