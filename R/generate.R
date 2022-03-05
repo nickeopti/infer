@@ -75,31 +75,39 @@
 #' @family core functions
 #' @export
 generate <- function(x, reps = 1, type = NULL,
-                     variables = !!response_expr(x), ...) {
-  # Check type argument, warning if necessary
-  type <- sanitize_generation_type(type)
-  auto_type <- sanitize_generation_type(attr(x, "type"))
-  type <- if (!is.null(type)) {
-    compare_type_vs_auto_type(type, auto_type)
+                     variables = !!response_expr(x), n = NULL, ...) {
+  if (is.function(x)) {
+    x(reps * n) %>%
+      as_tibble %>%
+      dplyr::mutate(replicate = rep(seq_len(reps), each = n)) %>%
+      dplyr::select(replicate, dplyr::everything()) %>%
+      dplyr::group_by(replicate)
   } else {
-    use_auto_type(auto_type)
+    # Check type argument, warning if necessary
+    type <- sanitize_generation_type(type)
+    auto_type <- sanitize_generation_type(attr(x, "type"))
+    type <- if (!is.null(type)) {
+      compare_type_vs_auto_type(type, auto_type)
+    } else {
+      use_auto_type(auto_type)
+    }
+    attr(x, "type") <- type
+
+    check_cols(x, rlang::enquo(variables), type, missing(variables))
+
+    attr(x, "generated") <- TRUE
+
+    switch(
+      type,
+      bootstrap = bootstrap(x, reps, ...),
+      permute = {
+        check_permutation_attributes(x)
+        permute(x, reps, rlang::enquo(variables), ...)
+      },
+      draw = draw(x, reps, ...),
+      simulate = draw(x, reps, ...)
+    )
   }
-  attr(x, "type") <- type
-
-  check_cols(x, rlang::enquo(variables), type, missing(variables))
-
-  attr(x, "generated") <- TRUE
-
-  switch(
-    type,
-    bootstrap = bootstrap(x, reps, ...),
-    permute = {
-      check_permutation_attributes(x)
-      permute(x, reps, rlang::enquo(variables), ...)
-    },
-    draw = draw(x, reps, ...),
-    simulate = draw(x, reps, ...)
-  )
 }
 
 # Check that type argument is an implemented type
