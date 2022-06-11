@@ -82,7 +82,7 @@ generate <- function(x, reps = 1, type = NULL,
                      variables = !!response_expr(x), n = NULL, ...) {
   if (is.function(x)) {
     # calculate a dummy example in order to get the correct attrs
-    tmp <- x(2) %>%
+    tmp <- x(50) %>%
       as_tibble %>%
       specify(response = value) %>%
       generate(reps = 2, type = "bootstrap")
