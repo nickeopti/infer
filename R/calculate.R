@@ -97,14 +97,16 @@ calculate <- function(x,
   check_type(x, tibble::is_tibble)
   check_if_mlr(x, "calculate")
   
-  f <- TRUE
+  default_behaviour <- TRUE
   tryCatch(
     expr = {
-      if (is.character(stat)) {
-        default_behaviour <- TRUE
-      } else {
-        print("This should never occur... Check your inputs")
-      }
+      is.character(stat)  # enforce an error if not
+      default_behaviour <<- TRUE
+      # if (is.character(stat)) {
+      #   default_behaviour <<- TRUE
+      # } else {
+      #   default_behaviour <<- TRUE
+      # }
     },
     error = function(e) {
       default_behaviour <<- FALSE
