@@ -411,8 +411,8 @@ simulation_layer <- function(data, dots = list(NULL)) {
     if (length(unique(data$stat)) >= 10) {
       res <- list(
         do.call(
-          ggplot2::stat_bin,
-          c(list(mapping = aes(x = stat), 
+          ggplot2::geom_histogram,
+          c(list(mapping = aes(x = stat, y = ..density..), 
                  bins = bins, 
                  color = "white", 
                  breaks = bin_breaks), 
