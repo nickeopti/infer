@@ -412,10 +412,9 @@ simulation_layer <- function(data, dots = list(NULL)) {
       res <- list(
         do.call(
           ggplot2::geom_histogram,
-          c(list(mapping = aes(x = stat, y = ..density..), 
-                 bins = bins, 
-                 color = "white", 
-                 breaks = bin_breaks), 
+          c(list(mapping = aes(x = stat, y = ..density..),
+                 bins = bins,
+                 breaks = bin_breaks),
             dots)
         )
       )
@@ -608,7 +607,7 @@ labels_layer <- function(data, term) {
   theory_type <- short_theory_type(data)
   
   x_lab <- switch(method, simulation = "{term}", "{theory_type} stat")
-  y_lab <- switch(method, simulation = "count", "density")
+  y_lab <- switch(method, simulation = "density", "density")
   
   list(
     xlab(glue_null(x_lab)),
